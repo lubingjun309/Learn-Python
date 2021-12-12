@@ -1,0 +1,31 @@
+import requests,re,csv
+from bs4 import BeautifulSoup
+
+url = "https://movie.douban.com/top250"
+headers = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36'}
+reponse = requests.get(url,headers = headers)
+html = reponse.text
+
+obj = re.compile(r'<li>.*?<div class="item">.*?<div class="pic">.*?<em class="">(?P<number>.*?)</em>'
+                 r'.*?<span class="title">(?P<name>.*?)</span>'
+                 r'.*?<div class="bd".*?<p class="">.*?<br>.*?(?P<year>.*?)&nbsp'
+                 r'.*?<div class="star">.*?<span class="rating_num" property="v:average">(?P<grade>.*?)</span>'
+                 r'.*?<span>(?P<comments>.*?)人评价</span>'
+                 ,re.S)
+res = obj.finditer(html)
+f= open('data.csv','w',encoding='utf-8')
+csv = csv.writer(f)
+for i in res:
+    # print(i.group('number'.strip()))
+    # print(i.group('name').strip())
+    # print(i.group('year').strip()+"年")
+    # print("评分\00"+ i.group('grade').strip())
+    # print("评论数\00"+ i.group('comments').strip())
+    dict = i.groupdict()
+    dict['year'] = dict['year'].strip() +"年"
+    dict['grade'] ="评分:"+ dict['grade']
+    dict['comments'] = "评论数:"+dict['comments']
+    csv.writerow(dict.values())
+    print(dict)
+f.close()
+print('over')
